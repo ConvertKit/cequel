@@ -19,6 +19,15 @@ module Cequel
         statement_txt = nil
         statement_words = nil
 
+        unless statement.cql.include?("subscriber_tracked_locations")
+          StoryTeller.tell(
+            message: "Cassandra range slice query executed",
+            stack: caller,
+            query: statement.cql,
+            bind_vars: statement.bind_vars
+          ) if (statement.cql.include?(">") || statement.cql.include?("<") || (statement.cql.include?("IN") && !statement.cql.include?("INSERT")))
+        end
+
         if statement.is_a?(::Cequel::Metal::Statement)
           statement_txt = statement.cql
           statement_words = statement_txt.split
